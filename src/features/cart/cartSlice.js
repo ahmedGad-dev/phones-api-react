@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import cartItems from '../../cartItems'
 import { openModal } from '../modal/modalSlice';
 
 const url = 'https://course-api.com/react-useReducer-cart-project';
 
 const initialState = {
-  cartItems: [],
+  cartItems: cartItems,
   amount: 4,
   total: 0,
   isLoading: true,
@@ -31,7 +32,40 @@ export const getCartItems = createAsyncThunk(
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
-  reducers: {}
+  reducers: {
+    clearCart: (state) => {
+      state.cartItems = []
+    },
+    removeItem: (state, action) => {
+      const id = action.payload
+      state.cartItems = cartItems.filter(item => {
+        return item.id !== id
+      })
+    },
+    increase: (state, {payload}) => {  
+        const cartItem = state.cartItems.find((item) => item.id === payload.id);
+        cartItem.amount = cartItem.amount + 1;
+    },
+    decrease: (state, { payload }) => {
+      const cartItem = state.cartItems.find((item) => item.id === payload.id);
+      if(cartItem.amount === 1){
+        state.cartItems = cartItems.filter(item => {
+          return item.id !== payload.id
+        })
+      }
+      cartItem.amount = cartItem.amount - 1;     
+    },
+    calculateTotals: (state) => {
+      let amount = 0;
+      let total = 0;
+      state.cartItems.forEach((item) => {
+        amount += item.amount;
+        total += item.amount * item.price;
+      });
+      state.amount = amount;
+      state.total = total;
+    },
+  }
 });
 
 // console.log(cartSlice);
