@@ -16,15 +16,13 @@ export const getCartItems = createAsyncThunk(
   'cart/getCartItems',
   async (name, thunkAPI) => {
     try {
-      // console.log(name);
       // console.log(thunkAPI);
       // console.log(thunkAPI.getState());
       // thunkAPI.dispatch(openModal());
       const resp = await axios(url);
-
       return resp.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue('something went wrong');
+        return thunkAPI.rejectWithValue('something went wrong');
     }
   }
 );
@@ -65,7 +63,21 @@ const cartSlice = createSlice({
       state.amount = amount;
       state.total = total;
     },
-  }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getCartItems.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getCartItems.fulfilled, (state, action) => {
+        console.log(action);
+        state.isLoading = false;
+        state.cartItems = action.payload;
+      })
+      .addCase(getCartItems.rejected, (state, action) => {
+        state.isLoading = false;
+      });
+  },
 });
 
 // console.log(cartSlice);
